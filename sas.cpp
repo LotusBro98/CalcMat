@@ -35,7 +35,7 @@ class Matrix
 	Matrix(double (*f)(int i, int j), int n, int m) : Matrix(n, m)
 	{
 		for (int i = 0; i < n; ++i)
-            for (int j = 0; j < n; ++j)
+            for (int j = 0; j < m; ++j)
 				a(i, j) = f(i, j);
 	}
 
