@@ -30,11 +30,11 @@ for i in range(n):
         Ab[nz,:] = Ab[i,:]
         Ab[i,:] = tmp
 
-    np.divide(Ab[i,:], Ab[i,i], Ab[i,:])    # Делим строку на Aii
+    Ab[i,:] /= Ab[i,i]                      # Делим строку на Aii
     for i1 in range(n):                     # Зануляем все эл-ты столбца, кроме i-того вычитанием домноженных строк
-        if (i1 == i):
+        if i1 == i:
             continue
-        np.subtract(Ab[i1,:], Ab[i, :] * Ab[i1, i], Ab[i1,:])
+        Ab[i1,:] -= Ab[i, :] * Ab[i1, i]
 
 x = Ab[:,n]                                 # Матрица слева приведена к единичной, справа приписан столбец решения
 
