@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/GaussMethod.dir/main.cpp.o  -o GaussMethod 
