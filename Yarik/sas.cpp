@@ -56,10 +56,7 @@ class Matrix
         int n = std::max(_n, b._n);
         int m = _m + b._m;
 
-		std::cout << "SES " << n << " " << m << "\n";
-
         Matrix * compound = new Matrix(n, m);
-		std::cout << "SES\n";
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
                 if (i < _n && j < _m)
@@ -113,7 +110,7 @@ class Matrix
 
     void gauss()
     {
-        for (int j = 0; j < _m; ++j)
+        for (int j = 0; j < std::min(_m, _n); ++j)
         {
             int in0;
             for (in0 = j; in0 < _n; in0++)
@@ -220,6 +217,24 @@ class Matrix
 		return this;
 	}
 
+	Matrix * operator /= (double c)
+	{
+        for (int i = 0; i < _n; ++i)
+            for (int j = 0; j < _m; ++j)
+                a(i, j) /= c;
+
+		return this;
+	}
+
+	Matrix * operator *= (double c)
+	{
+        for (int i = 0; i < _n; ++i)
+            for (int j = 0; j < _m; ++j)
+                a(i, j) *= c;
+
+		return this;
+	}
+
     double vectorNormSqrt()
     {
         double len2 = 0;
@@ -272,7 +287,62 @@ class Matrix
         }
 	}
 
+	void set(Matrix * A)
+	{
+		if (A->_n != _n || A->_m != _m)
+			throw;
 
+		for (int i = 0; i < _n; i++)
+			for (int j = 0; j < _m; j++)
+				a(i, j) = A->a(i, j);
+	}
+
+	Matrix * normalize()
+	{
+		return *this /= vectorNormSqrt();
+	}
+
+	Matrix * newE(int n = 0)
+	{
+		if (n == 0)
+			n = _n;
+
+		return new Matrix([](int i, int j) -> double {return i == j ? 1 : 0;}, n, n); 
+	}
+
+	Matrix * inverse()
+	{
+		auto E = newE();
+		auto * AA_1 = *this | *E;
+		AA_1->gauss();
+
+		auto A_1 = AA_1->subMatrix(0, _n, _n, _n);
+
+		delete AA_1;
+		delete E;
+
+		return A_1;
+	}
+
+	double calcLambdaMax(double eps = 1e-7)
+	{
+		auto * x = new Matrix([](int i, int j) -> double {return 1;}, _n, 1);
+		auto * x0 = x->copy()->normalize();
+		double r;
+		double L;
+
+		do
+		{
+			x->setMul(this, x0);
+			L = x->vectorNormSqrt();
+			x->normalize();
+			r = (*x0 -= *x)->vectorNormSqrt(); 
+			x0->set(x);
+		}
+		while (r > eps);
+
+		return L;
+	}
 
     ~Matrix()
     {
@@ -308,7 +378,7 @@ Matrix * solveGauss(Matrix * A, Matrix * b)
 	return x;
 }
 
-Matrix * solveIter(Matrix * A, Matrix * b, double w = 1, double eps = 1e-4)
+Matrix * solveIter(Matrix * A, Matrix * b, double eps = 1e-4, double w = 1)
 {
 	if (A->n() != b->n())
 		throw;
@@ -330,9 +400,11 @@ Matrix * solveIter(Matrix * A, Matrix * b, double w = 1, double eps = 1e-4)
 
 		r->setMul(A, x);
 		*r -= *b;
-		std::cout << r->vectorNormSqrt() << "\n";
+		std::cout << "|r| = " << r->vectorNormSqrt() << "\n";
 	}
 	while (r->vectorNormSqrt() > eps);
+
+	std::cout << "\n";
 
 	return x; 
 }
@@ -351,20 +423,36 @@ double stolbGen(int i, int j)
 	return i + 1;
 }
 
-
 int main()
 {
 	Matrix * A = new Matrix(matGen, 100, 100);
 	Matrix * b = new Matrix(stolbGen, 100, 1);
 
 	Matrix * xGauss = solveGauss(A, b);
-	std::cout << xGauss;
-	//std::cout << (*(*A * *xGauss) -= *b)->vectorNormSqrt() << "\n";
+	std::cout << "\nxGauss:\n\n" << xGauss;
+	std::cout << "|r| = " << (*(*A * *xGauss) -= *b)->vectorNormSqrt() << "\n";
 
-	std::cout << "---------------\n";
+	std::cout << "\n---------------\n\n";
 
-	Matrix * xZeydel = solveIter(A, b);
-	std::cout << xZeydel;
+	Matrix * xZeydel = solveIter(A, b, 1e-10);
+	std::cout << "xZeydel:\n\n" << xZeydel;
+	std::cout << "|r| = " << (*(*A * *xZeydel) -= *b)->vectorNormSqrt() << "\n";
+	
+	std::cout << "\n---------------\n\n";
+
+	auto A_1 = A->inverse();
+	
+	double Lmax = A->calcLambdaMax();
+	double Lmin_1 = A_1->calcLambdaMax();
+	double mu = Lmax * Lmin_1;
+
+	std::cout << "Lmax\t= " << Lmax << "\n";
+	std::cout << "1/Lmin\t= " << Lmin_1 << "\n";
+	std::cout << "mu\t= " << mu << "\n";
+	
+	delete A;
+	delete A_1;
+	delete b;
 }
 
 // ------------------------------------------------------------
