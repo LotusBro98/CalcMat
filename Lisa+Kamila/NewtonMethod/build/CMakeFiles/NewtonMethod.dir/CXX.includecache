@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/alex/Extra/GitHub/CalcMat/Lisa+Kamila/NewtonMethod/main.cpp
+iostream
+-
+fstream
+-
+iomanip
+-
+cmath
+-
+string.h
+-
+

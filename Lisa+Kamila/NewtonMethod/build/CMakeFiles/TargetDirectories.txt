@@ -1,0 +1,3 @@
+/home/alex/Extra/GitHub/CalcMat/Lisa+Kamila/NewtonMethod/build/CMakeFiles/rebuild_cache.dir
+/home/alex/Extra/GitHub/CalcMat/Lisa+Kamila/NewtonMethod/build/CMakeFiles/NewtonMethod.dir
+/home/alex/Extra/GitHub/CalcMat/Lisa+Kamila/NewtonMethod/build/CMakeFiles/edit_cache.dir
